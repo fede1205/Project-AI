@@ -1,66 +1,71 @@
+from os import kill
 import RPi.GPIO as GPIO
+import threading
 from gpiozero import LED, Button
 from datetime import datetime
 import csv
-import pandas as pd
-import matplotlib as mpl
+import time
+import threading as th
 
 
-ledKamer = LED(4)
-ledVPk = LED(17)
-buttonkamer103 = Button(2)
-buttonkamer103._hold_repeat = False
-buttonkamer104 = Button(16)
-buttonkamer105 = Button(23)
-buttonVPK = Button(10)
+ledRoom = LED(4)
+ledNurse = LED(17)
+buttonRoom103 = Button(2)
+buttonRoom103._hold_repeat = False
+buttonRoom104 = Button(16)
+buttonRoom105 = Button(23)
+buttonNurse = Button(10)
 
-statusVPK = False
+statusNurse = False
 # status False = geen VPK aanwezig in de kamer
 # status True = VPK aanwezig in de kamer
 
 
-ledKamer.off()
+ledRoom.off()
 
-calls = []
 
-class Kamer():
+class room():
+    def __init__(self, roomNumber, patient, button):
+        self.roomNumber
+        self.patient
+        self.button
 
-    def oproep(source):
-        global calls, ledKamer,ledVPk
-        ledKamer.blink()
-        ledVPk.on()
+    def locateSource(source):
+        if(source == buttonRoom103):
+            return "room 103"
+        elif(source == buttonRoom104):
+            return "room 104"
+        elif(source == buttonRoom105):
+            return "room 105"
+        else:
+            return "source unknown"
+
+    def call(source):
+        global ledRoom,ledNurse
+        ledRoom.blink()
+        ledNurse.on()
         current_date_time = datetime.now()
-        new_list = [source, current_date_time]
+        newCall = [room.locateSource(source), current_date_time,]
         with open ('/home/pi/Project-Ai/calls.csv', 'a+', newline='') as file:
             file_write = csv.writer(file)
-            file_write.writerow(new_list)
+            file_write.writerow(newCall)
             file.close()
+            
 
-class verpleegkundige():
-    def oproep():
-        global statusVPK, ledKamer,ledVPk
-        if (statusVPK == False):
-            statusVPK = True
-            ledKamer.on()
-            ledVPk.off()
+class Nurse():
+    def call():
+        global statusNurse, ledRoom,ledNurse
+        if (statusNurse == False):
+            statusNurse = True
+            ledRoom.on()
+            ledNurse.off()
         else:
-            statusVPK = False
-            ledKamer.off()
-
+            statusNurse = False
+            ledRoom.off()
 
 while True:
-    if(buttonkamer103.is_active==True):
-        source = "room 103"
-        Kamer.oproep(source)
-    elif(buttonkamer104.is_active==True):
-        source = "room 104"
-        Kamer.oproep(source)
-    elif(buttonkamer105.is_active==True):
-        source = "room 105"
-        Kamer.oproep(source)
-        
+    buttonRoom103.when_activated = room.call
+    buttonRoom104.when_activated = room.call
+    buttonRoom105.when_activated = room.call
 
-    buttonVPK.when_activated = verpleegkundige.oproep
-
-
-    
+    buttonNurse.when_activated = Nurse.call

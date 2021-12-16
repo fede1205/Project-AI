@@ -41,7 +41,7 @@ class Kamer():
         ledKamer.blink()
         ledVPk.on()
         current_date_time = datetime.now()
-        new_list = [Kamer.locateSource(source), current_date_time]
+        new_list = [Kamer.locateSource(source), current_date_time,]
         with open ('/home/pi/Project-Ai/calls.csv', 'a+', newline='') as file:
             file_write = csv.writer(file)
             file_write.writerow(new_list)
