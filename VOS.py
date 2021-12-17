@@ -1,4 +1,3 @@
-from os import kill
 import RPi.GPIO as GPIO
 import threading
 from gpiozero import LED, Button
@@ -29,6 +28,7 @@ class room():
         self.roomNumber
         self.patient
         self.button
+        self.source
 
     def locateSource(source):
         if(source == buttonRoom103):
